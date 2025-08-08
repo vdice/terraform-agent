@@ -8,14 +8,25 @@ resource "aws_key_pair" "deployer" {
 }
 
 resource "aws_security_group" "agent_sg" {
-  name        = "terraform-agent-sg"
-  description = "Allow SSH"
+  name = "terraform-agent-sg"
 
   ingress {
+    description = "Allow SSH"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # For SSH access – restrict in production
+    cidr_blocks = var.allowed_ingress_cidr_blocks
+  }
+
+  dynamic "ingress" {
+    for_each = var.tailscale_exit_node ? [1] : []
+    content {
+      description = "Allow Tailscale UDP"
+      from_port   = 41641
+      to_port     = 41641
+      protocol    = "udp"
+      cidr_blocks = var.allowed_ingress_cidr_blocks
+    }
   }
 
   egress {
@@ -36,46 +47,9 @@ resource "aws_instance" "terraform_agent" {
     Name = "terraform-agent"
   }
 
-  user_data = <<-EOF
-    #!/bin/bash
-    # Update and install dependencies
-    apt-get update -y
-    apt-get install -y curl gnupg unzip
-
-    # Install Tailscale
-    curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/jammy.noarmor.gpg | sudo tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
-    curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/jammy.tailscale-keyring.list | sudo tee /etc/apt/sources.list.d/tailscale.list
-    apt-get update -y
-    apt-get install -y tailscale
-
-    # Start Tailscale with auth key
-    tailscale up --authkey=${var.tailscale_auth_key} --hostname=terraform-agent
-
-    # Install Terraform Cloud Agent
-    curl -L -o tfc-agent.zip https://releases.hashicorp.com/tfc-agent/1.23.1/tfc-agent_1.23.1_linux_amd64.zip
-    unzip tfc-agent.zip && rm tfc-agent.zip
-    mv tfc-agent* /usr/local/bin/
-
-    # Create systemd service
-    cat <<EOT > /etc/systemd/system/tfc-agent.service
-    [Unit]
-    Description=Terraform Cloud Agent
-    After=network.target
-
-    [Service]
-    ExecStart=/usr/local/bin/tfc-agent -token=${var.tfc_agent_token} -name=agent1
-    Restart=always
-    RestartSec=5
-    Environment=PATH=/usr/local/bin:/usr/bin:/bin
-
-    [Install]
-    WantedBy=multi-user.target
-    EOT
-
-    # Start and enable the service
-    systemctl daemon-reexec
-    systemctl daemon-reload
-    systemctl enable tfc-agent
-    systemctl start tfc-agent
-  EOF
+  user_data = templatefile("${path.module}/user-data.sh", {
+    tailscale_auth_key  = var.tailscale_auth_key
+    tfc_agent_token     = var.tfc_agent_token
+    tailscale_exit_node = var.tailscale_exit_node
+  })
 }
