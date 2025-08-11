@@ -17,6 +17,7 @@ jobs:
         chart: [tfc-agent, tfc-agent-tailscale]
     env:
       CHART_NAME: ${{ matrix.chart }}
+      REGISTRY: ghcr.io/${{ github.repository_owner }}
     steps:
       - uses: actions/checkout@v4
         with:
