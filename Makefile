@@ -1,7 +1,7 @@
-CHART_NAME := tfc-agent
-CHART_DIR := chart
+CHART_NAME ?= tfc-agent
+CHART_DIR ?= charts/$(CHART_NAME)
 CHART_VERSION := $(shell grep '^version:' $(CHART_DIR)/Chart.yaml | awk '{print $$2}')
-REGISTRY ?= ghcr.io/vdice/terraform-agent
+REGISTRY ?= ghcr.io/vdice/$(CHART_NAME)
 
 .PHONY: lint
 lint:

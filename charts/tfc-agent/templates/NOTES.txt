@@ -1,0 +1,11 @@
+```gotmpl
+Your Terraform Cloud Agent has been deployed.
+
+Release Name: {{ .Release.Name }}
+Namespace:    {{ .Release.Namespace }}
+
+To verify your agent pod is running:
+  kubectl get pods -n {{ .Release.Namespace }} -l app=tfc-agent
+
+To check logs:
+  kubectl logs -n {{ .Release.Namespace }} deployment/tfc-agent -c tfc-agent

@@ -1,0 +1,20 @@
+image:
+  repository: hashicorp/tfc-agent
+  tag: "1.23"
+  pullPolicy: IfNotPresent
+
+# Secret is expected to already exist in the cluster
+tokenSecretKeyRef:
+  name: "tfc-agent-token"
+  key: "TFC_AGENT_TOKEN"
+
+replicas: 1
+
+## An array of sidecars which to be configured for the agent, eg a Tailscale sidecar
+##
+## The syntax here is the raw container specification.
+# sidecars:
+# - name: tailscale-sidecar
+#   image: "ghcr.io/tailscale/tailscale:stable"
+#   imagePullPolicy: IfNotPresent
+# ......

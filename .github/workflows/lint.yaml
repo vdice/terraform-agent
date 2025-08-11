@@ -1,4 +1,4 @@
-name: Lint Helm Chart
+name: Lint Helm Charts
 
 on:
   push:
@@ -11,6 +11,11 @@ permissions:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        chart: [tfc-agent, tfc-agent-tailscale]
+    env:
+      CHART_NAME: ${{ matrix.chart }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

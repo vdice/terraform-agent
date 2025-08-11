@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tfc-agent
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: tfc-agent
+  template:
+    metadata:
+      labels:
+        app: tfc-agent
+    spec:
+      containers:
+      {{- if .Values.sidecars -}}
+      {{ toYaml .Values.sidecars | nindent 6 -}}
+      {{- end }}
+        - name: tfc-agent
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: TFC_AGENT_TOKEN
+              valueFrom:
+                secretKeyRef: {{ .Values.tokenSecretKeyRef | toJson }}
