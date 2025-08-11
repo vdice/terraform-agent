@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "tfc-agent.fullname" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "tfc-agent.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "tfc-agent.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: tfc-agent
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: TFC_AGENT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "tfc-agent.fullname" . }}-token
+                  key: TFC_AGENT_TOKEN
+{{- if .Values.tailscale.authKey }}
+        - name: tailscale-sidecar
+          image: {{ .Values.tailscale.image.repository }}:{{ .Values.tailscale.image.tag }}
+          imagePullPolicy: {{ .Values.tailscale.image.pullPolicy }}
+          env:
+            # Setting TS_KUBE_SECRET means tailscale does not try
+            # to store state as kube-secret. This is imp if this 
+            # sidecar is part of a replicaset where replica count > 1.
+            # without this, all pods of that replicaset tries to use
+            # same kube secret to store the state, triggering tailscale issues.
+            #
+            # Tailscale defaults this to "tailscale" if we completely remove
+            # this env variable (as oppose to setting an empty string).
+          - name: TS_KUBE_SECRET
+            value: ""
+            # Without this the pods cannot connect to nodes on tailnet.
+          - name: TS_USERSPACE
+            value: "false"
+          - name: TS_DEBUG_FIREWALL_MODE
+            value: auto
+          - name: TS_TAILSCALED_EXTRA_ARGS
+            value: "--statedir=/tailscale-state"
+          - name: TS_AUTHKEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "tfc-agent.fullname" . }}-tailscale-authkey
+                key: TS_AUTHKEY
+                optional: true
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: POD_UID
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.uid
+          securityContext:
+            privileged: true
+            runAsUser: 0
+{{- end }}

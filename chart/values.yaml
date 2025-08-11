@@ -1,0 +1,15 @@
+agentToken: "changeme"
+
+image:
+  repository: hashicorp/tfc-agent
+  tag: "1.23"
+  pullPolicy: IfNotPresent
+
+tailscale:
+  authKey: ""
+  image:
+    repository: ghcr.io/tailscale/tailscale
+    tag: stable
+    pullPolicy: IfNotPresent
+
+replicaCount: 1

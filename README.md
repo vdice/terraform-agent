@@ -1,6 +1,8 @@
-Example terraform for:
+Example terraform and Helm chart for a Terraform Cloud agent
 
-- a custom Terraform Cloud agent
-    - on AWS EC2
+- [agent](/agent): terraform for a custom Terraform Cloud agent
+    - provisioned via AWS EC2
     - with Tailscale auth
-- a demo to run on the agent to verify Tailscale access, etc
+- [chart](/chart): Helm chart for a custom Terraform Cloud agent
+    - with Tailscale auth
+- [demo](/demo): to run in Terraform Cloud using the agent to verify Tailscale access, etc

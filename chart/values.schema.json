@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "agentToken": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Terraform Cloud agent token (required)"
+    },
+    "tailscale.authKey": {
+      "type": "string",
+      "description": "Tailscale auth key to join tailnet (optional)"
+    },
+    "image": {
+      "type": "object",
+      "properties": {
+        "repository": { "type": "string" },
+        "tag": { "type": "string" },
+        "pullPolicy": { "type": "string" }
+      },
+      "required": ["repository", "tag", "pullPolicy"]
+    },
+    "tailscale": {
+      "type": "object",
+      "properties": {
+        "image": {
+        "type": "object",
+        "properties": {
+            "repository": { "type": "string" },
+            "tag": { "type": "string" },
+            "pullPolicy": { "type": "string" }
+        },
+        "required": ["repository", "tag", "pullPolicy"]
+        }
+      }
+    },
+    "replicaCount": {
+      "type": "integer",
+      "minimum": 1
+    }
+  },
+  "required": ["agentToken"]
+}

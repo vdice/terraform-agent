@@ -1,0 +1,36 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "tfc-agent.fullname" . }}-tailscale-auth
+  namespace: default
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["create"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames: [{{ include "tfc-agent.fullname" . }}-tailscale-authkey]
+    verbs: ["get", "update", "patch"]
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["get", "create", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "tfc-agent.fullname" . }}-tailscale-auth
+  namespace: default
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "tfc-agent.fullname" . }}-tailscale-auth
+    namespace: default
+roleRef:
+  kind: Role
+  name: {{ include "tfc-agent.fullname" . }}-tailscale-auth
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "tfc-agent.fullname" . }}-tailscale-auth
+  namespace: default
