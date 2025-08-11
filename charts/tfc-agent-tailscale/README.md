@@ -26,14 +26,14 @@ Optionally supports connecting the agent to a [Tailscale](https://tailscale.com)
 Clone or download this chart, then install it with:
 
 ```bash
-helm install tfc-agent . \
+helm install tfc-agent-tailscale . \
   --set agentToken="<tfc-agent-token>"
 ```
 
 Optionally supplying a tailscale auth key to connect to a tailnet:
 
 ```bash
-helm install tfc-agent . \
+helm install tfc-agent-tailscale . \
   --set agentToken="<tfc-agent-token>" \
   --set tailscale.authKey="<tailscale-auth-key>"
 ```
