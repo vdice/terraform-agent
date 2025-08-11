@@ -10,7 +10,6 @@ permissions:
   packages: write # To publish the Helm chart
 
 jobs:
-jobs:
   publish:
     runs-on: ubuntu-latest
     env:
